@@ -2,6 +2,15 @@
 <html>
 <head>
     <title>Leitor de Código de Barras</title>
+    <style>
+        /* Estilo para o histórico de códigos lidos */
+        #codeHistory {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 5px;
+        }
+    </style>
 </head>
 <body>
     <h1>Leitor de Código de Barras</h1>
@@ -10,19 +19,25 @@
     <video id="barcodeScanner" autoplay="true"></video>
 
     <!-- Exibir o número do código de barras lido -->
+    <p>Último código lido:</p>
     <p id="result"></p>
+
+    <!-- Histórico de códigos lidos -->
+    <div id="codeHistory"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
     <script>
         const videoElement = document.getElementById("barcodeScanner");
         const resultElement = document.getElementById("result");
+        const codeHistoryElement = document.getElementById("codeHistory");
+        const codeHistory = [];
 
         // Configuração da câmera traseira
         const constraints = {
             video: {
                 facingMode: "environment", // Use a câmera traseira
-                width: { ideal: 640 },
-                height: { ideal: 480 }
+                width: { ideal: 450 },
+                height: { ideal: 320 }
             }
         };
 
@@ -58,8 +73,17 @@
             const code = result.codeResult.code;
             resultElement.textContent = "Código de barras lido: " + code;
 
-            // Você pode adicionar a lógica para copiar ou processar o código aqui
+            // Adicionar o código ao histórico
+            codeHistory.push(code);
+            updateCodeHistory();
         });
+
+        // Atualizar o histórico de códigos lidos
+        function updateCodeHistory() {
+            codeHistoryElement.innerHTML = codeHistory.map((code, index) => {
+                return `<p>${index + 1}. ${code}</p>`;
+            }).join("");
+        }
     </script>
 </body>
 </html>
