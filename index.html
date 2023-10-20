@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Leitor de Código de Barras</title>
+</head>
+<body>
+    <h1>Leitor de Código de Barras</h1>
+    
+    <!-- Botão para ativar a câmera -->
+    <button id="startButton">Ativar Câmera</button>
+    
+    <!-- Exibir o número do código de barras lido -->
+    <p id="result"></p>
+
+    <script src="https://cdn.rawgit.com/serratus/quaggaJS/6.4.2/dist/quagga.min.js"></script>
+    <script>
+        const startButton = document.getElementById("startButton");
+        const resultElement = document.getElementById("result");
+
+        startButton.addEventListener("click", function() {
+            Quagga.init({
+                inputStream: {
+                    name: "Live",
+                    type: "LiveStream",
+                    target: document.querySelector("#yourElement"), // Exibir a câmera em um elemento específico
+                    constraints: {
+                        width: 640,
+                        height: 480,
+                        facingMode: "environment" // Use a câmera traseira (geralmente com foco automático)
+                    },
+                },
+                decoder: {
+                    readers: ["ean_reader"]
+                }
+            }, function(err) {
+                if (err) {
+                    console.log(err);
+                    return;
+                }
+                Quagga.start();
+            });
+
+            Quagga.onDetected(function(result) {
+                resultElement.textContent = result.codeResult.code;
+            });
+        });
+    </script>
+</body>
+</html>
