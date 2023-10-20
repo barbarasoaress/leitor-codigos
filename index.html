@@ -2,31 +2,73 @@
 <html>
 <head>
     <title>Leitor de Código de Barras</title>
+    <style>
+        /* Espelhar a imagem horizontalmente */
+        #barcodeScanner {
+            transform: scaleX(-1);
+            -webkit-transform: scaleX(-1);
+            transform-origin: center;
+            -webkit-transform-origin: center;
+        }
+    </style>
 </head>
 <body>
     <h1>Leitor de Código de Barras</h1>
 
+    <!-- Elemento de vídeo para exibir a imagem da câmera -->
     <video id="barcodeScanner" autoplay="true"></video>
 
     <!-- Exibir o número do código de barras lido -->
     <p id="result"></p>
 
+    <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
     <script>
         const videoElement = document.getElementById("barcodeScanner");
         const resultElement = document.getElementById("result");
 
-        // Verifique se o navegador suporta a API WebRTC
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(function (stream) {
-                    videoElement.srcObject = stream;
-                })
-                .catch(function (error) {
-                    console.error("Erro ao acessar a câmera: " + error);
-                });
-        } else {
-            console.error("Seu navegador não suporta a API WebRTC");
-        }
+        // Configuração da câmera traseira
+        const constraints = {
+            video: {
+                facingMode: "environment", // Use a câmera traseira
+                width: { ideal: 640 },
+                height: { ideal: 480 }
+            }
+        };
+
+        // Acessar a câmera
+        navigator.mediaDevices.getUserMedia(constraints)
+            .then(function (stream) {
+                videoElement.srcObject = stream;
+            })
+            .catch(function (error) {
+                console.error("Erro ao acessar a câmera: " + error);
+            });
+
+        // Configurar o Quagga para ler códigos de barras
+        Quagga.init({
+            inputStream: {
+                name: "Live",
+                type: "LiveStream",
+                target: videoElement,
+            },
+            decoder: {
+                readers: ["ean_reader"]
+            }
+        }, function (err) {
+            if (err) {
+                console.log(err);
+                return;
+            }
+            Quagga.start();
+        });
+
+        // Quando um código de barras é lido
+        Quagga.onDetected(function (result) {
+            const code = result.codeResult.code;
+            resultElement.textContent = "Código de barras lido: " + code;
+
+            // Você pode adicionar a lógica para copiar ou processar o código aqui
+        });
     </script>
 </body>
 </html>
